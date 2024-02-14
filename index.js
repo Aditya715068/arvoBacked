@@ -2,9 +2,12 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 
+
 import connectDB from "./mongodb/connect.js";
 import userRouter from "./routes/user.routes.js";
+import nfcRouter  from "./routes/nfc.routes.js"
 import propertyRouter from "./routes/property.routes.js";
+
 
 dotenv.config();
 
@@ -18,7 +21,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/properties", propertyRouter);
-
+app.use("/api/v1/nfcscan", nfcRouter);
 const startServer = async () => {
     try {
         connectDB(process.env.MONGODB_URL);

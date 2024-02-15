@@ -122,7 +122,7 @@ const uidRegex = /([0-9A-Fa-f]+)(?:x([0-9A-Fa-f]+))?(?:x([0-9A-Fa-f]+))?/;
        const {productName}= req.body
        
         try {
-            const list = await NfcSession.find({ 'productData.productName': 's' });
+            const list = await NfcSession.find({ 'productData.productName': productName })
             res.status(200).json({ list });
         } catch (error) {
             console.error('Error fetching NfcSessions:', error);

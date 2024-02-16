@@ -55,7 +55,7 @@ const uidRegex = /([0-9A-Fa-f]+)(?:x([0-9A-Fa-f]+))?(?:x([0-9A-Fa-f]+))?/;
                     tagId: nfcDocument.tagId,
                     tagType:nfcDocument.tagType,
                     tagCounter:nfcDocument.decimalValue,
-                    openclose:nfcDocument.openclose
+                    openclose:nfcDocument.openclose,
                 
                     geodata: geodata, // Assuming geodata is a JSON string
                     productData: {

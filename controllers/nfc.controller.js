@@ -77,7 +77,7 @@ const uidRegex = /([0-9A-Fa-f]+)(?:x([0-9A-Fa-f]+))?(?:x([0-9A-Fa-f]+))?/;
                         tagId: nfcDocument.tagId,
                         tagType:nfcDocument.tagType,
                         tagCounter:nfcDocument.tagCounter,
-                        openclose:nfcDocument.openclose
+                        openclose:openclose
 
                         // Add other properties from NFC document as needed
                     },

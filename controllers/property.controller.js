@@ -37,9 +37,10 @@ const getAllProperties = async (req, res) => {
         const count = await Property.countDocuments({ query });
 
         const properties = await Property.find(query)
-            .limit(_end)
-            .skip(_start)
-            .sort({ [_sort]: _order });
+            // .limit(_end)
+            // .skip(_start)
+            // .sort({ [_sort]: _order });
+            console.log(properties)
 
         res.header("x-total-count", count);
         res.header("Access-Control-Expose-Headers", "x-total-count");
@@ -65,74 +66,97 @@ const getPropertyDetail = async (req, res) => {
 
 const createProperty = async (req, res) => {
     try {
-        const {
-            title,
-            description,
-            category,
-            brandDetail,
-            price,
-            photo,
-            email,
-        } = req.body;
-
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        console.log(req.body)
-
-        const user = await User.findOne({ email }).session(session);
-
-        if (!user) throw new Error("User not found");
-
-        const photoUrl = await cloudinary.uploader.upload(photo);
-
-        const newProperty = await Property.create({
-            title,
-            description,
-            category,
-            brandDetail,
-            price,
-            photo: photoUrl.url,
-            creator: user._id,
-        });
-
-        user.allProperties.push(newProperty._id);
-        await user.save({ session });
-
-        await session.commitTransaction();
-
-        res.status(200).json({ message: "Property created successfully" });
+      const {
+        title,
+        description,
+        category,
+        brandDetail,
+        price,
+        photo,
+        email,
+      } = req.body;
+  
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      console.log(req.body);
+  
+      const user = await User.findOne({ email }).session(session);
+  
+      if (!user) throw new Error("User not found");
+  
+      const photoUrls = await Promise.all(
+        photo.map(async (photo) => {
+          try {
+            const result = await cloudinary.uploader.upload(photo);
+            return result.url;
+          } catch (error) {
+            throw new Error(`Error uploading photo to Cloudinary: ${error.message}`);
+          }
+        })
+      );
+  
+      const newProperty = await Property.create({
+        title,
+        description,
+        category,
+        brandDetail,
+        price,
+        photo: photoUrls,
+        creator: user._id,
+      });
+  
+      user.allProperties.push(newProperty._id);
+      await user.save({ session });
+  
+      await session.commitTransaction();
+  
+      res.status(200).json({ message: "Property created successfully" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
-
+  };
+  
 const updateProperty = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { title, description, category, brandDetail, price, photo } =
-            req.body;
+      const { id } = req.params;
+      const { title, description, category, brandDetail, price, photo } = req.body || {};
 
-        const photoUrl = await cloudinary.uploader.upload(photo);
-
-        console.log(req.body)
-
-        await Property.findByIdAndUpdate(
-            { _id: id },
-            {
-                title,
-                description,
-                category,
-                brandDetail,
-                price,
-                photo: photoUrl.url || photo,
-            },
-        );
-
-        res.status(200).json({ message: "Property updated successfully" });
+      console.log(photo)
+  
+      if (!photo || !Array.isArray(photo) || photo.length === 0) {
+        return res.status(400).json({ message: 'Photos array is required in the request body' });
+      }
+  
+      const photoUrls = await Promise.all(
+        photo.map(async (photo) => {
+          try {
+            const result = await cloudinary.uploader.upload(photo);
+            return result.url;
+          } catch (error) {
+            throw new Error(`Error uploading photo to Cloudinary: ${error.message}`);
+          }
+        })
+      );
+  
+      await Property.findOneAndUpdate(
+        { _id: id },
+        {
+          title,
+          description,
+          category,
+          brandDetail,
+          price,
+          photo: photoUrls,
+        },
+        { new: true }
+      );
+  
+      res.status(200).json({ message: 'Property updated successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
+  
 
 const deleteProperty = async (req, res) => {
     try {

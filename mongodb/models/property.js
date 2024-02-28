@@ -7,7 +7,7 @@ const PropertySchema = new mongoose.Schema({
     brandDetail: { type: String, required: true },
     nfcIds: { type: [String], default: [] },
     price: { type: Number, required: true },
-    photo: { type: String, required: true },
+    photo: { type: [String], required: true },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
